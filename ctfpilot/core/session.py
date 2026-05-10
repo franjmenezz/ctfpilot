@@ -1,4 +1,3 @@
-import json
 import sqlite3
 from datetime import datetime
 from pathlib import Path
@@ -65,7 +64,7 @@ def get_active_session():
     row = cursor.fetchone()
     conn.close()
     if row:
-        return {"id": row[0], "name": row[1], "target": row[2], 
+        return {"id": row[0], "name": row[1], "target": row[2],
                 "platform": row[3], "started_at": row[4]}
     return None
 
@@ -99,8 +98,47 @@ def get_session_data(session_id: int) -> dict:
     cursor.execute("SELECT flag_type, value, created_at FROM flags WHERE session_id = ?", (session_id,))
     flags = cursor.fetchall()
     conn.close()
-    return {
-        "session": session,
-        "notes": notes,
-        "flags": flags
-    }
+    return {"session": session, "notes": notes, "flags": flags}
+
+def finish_session(session_id: int):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE sessions SET status = 'finished', finished_at = ? WHERE id = ?",
+        (datetime.now().isoformat(), session_id)
+    )
+    conn.commit()
+    conn.close()
+
+def get_all_sessions() -> list:
+    init_db()
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT id, name, target, platform, started_at, finished_at, status FROM sessions ORDER BY started_at DESC"
+    )
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
+def detect_platform(target: str) -> str:
+    import ipaddress
+    try:
+        ip = ipaddress.ip_address(target)
+        octets = str(ip).split(".")
+        if octets[0] == "10":
+            if octets[1] == "10" and octets[2] == "10":
+                return "htb"
+            if octets[1] == "10" and int(octets[2]) in range(0, 100):
+                return "htb"
+            if octets[1] == "129":
+                return "htb"
+            if octets[1] == "10" and int(octets[2]) in range(100, 200):
+                return "thm"
+        return "other"
+    except ValueError:
+        if any(x in target.lower() for x in ["htb", "hackthebox"]):
+            return "htb"
+        if any(x in target.lower() for x in ["thm", "tryhackme"]):
+            return "thm"
+        return "other"
