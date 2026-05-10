@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ctfpilot# 🧭 CTFPilot
 
 > Your co-pilot for CTFs and HackTheBox machines
@@ -126,3 +127,6 @@ Reports are automatically saved to `~/Desktop/CTFPilot/` and include:
 ## License
 
 MIT License — feel free to use and contribute.
+=======
+
+>>>>>>> ad5cf7db39143abcbbe95db627f4bc9d9c025817
