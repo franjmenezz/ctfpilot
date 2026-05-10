@@ -129,5 +129,69 @@ def history():
         table.add_row(str(s[0]), s[1], s[2], s[3].upper(), estado, s[4][:16])
     console.print(table)
 
+@app.command()
+def wordlist(
+    service: str = typer.Argument(..., help="Servicio: http, smb, ssh, ftp, dns, user, pass")
+):
+    """Sugiere wordlists segun el servicio."""
+    from rich.table import Table
+    from ctfpilot.core.logger import console
+
+    WORDLISTS = {
+        "http": [
+            ("/usr/share/wordlists/dirb/common.txt", "Directorios comunes"),
+            ("/usr/share/wordlists/dirb/big.txt", "Directorios grande"),
+            ("/usr/share/seclists/Discovery/Web-Content/raft-medium-directories.txt", "Raft medium dirs"),
+            ("/usr/share/seclists/Discovery/Web-Content/api/api-endpoints.txt", "API endpoints"),
+            ("/usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt", "Dirbuster medium"),
+        ],
+        "smb": [
+            ("/usr/share/seclists/Discovery/SMB/common-shares.txt", "Shares comunes"),
+            ("/usr/share/wordlists/metasploit/unix_users.txt", "Usuarios Unix"),
+        ],
+        "ssh": [
+            ("/usr/share/wordlists/rockyou.txt", "Rockyou - passwords"),
+            ("/usr/share/wordlists/metasploit/unix_users.txt", "Usuarios Unix"),
+            ("/usr/share/seclists/Usernames/top-usernames-shortlist.txt", "Top usernames"),
+        ],
+        "ftp": [
+            ("/usr/share/wordlists/rockyou.txt", "Rockyou - passwords"),
+            ("/usr/share/seclists/Usernames/top-usernames-shortlist.txt", "Top usernames"),
+        ],
+        "dns": [
+            ("/usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt", "Subdominios top 5000"),
+            ("/usr/share/seclists/Discovery/DNS/subdomains-top1million-20000.txt", "Subdominios top 20000"),
+            ("/usr/share/wordlists/dirb/common.txt", "Comunes"),
+        ],
+        "user": [
+            ("/usr/share/seclists/Usernames/top-usernames-shortlist.txt", "Top usernames corta"),
+            ("/usr/share/wordlists/metasploit/unix_users.txt", "Usuarios Unix"),
+            ("/usr/share/seclists/Usernames/Names/names.txt", "Nombres comunes"),
+            ("/usr/share/seclists/Usernames/xato-net-10-million-usernames.txt", "10M usernames"),
+        ],
+        "pass": [
+            ("/usr/share/wordlists/rockyou.txt", "Rockyou 14M passwords"),
+            ("/usr/share/seclists/Passwords/Common-Credentials/10k-most-common.txt", "Top 10k passwords"),
+            ("/usr/share/seclists/Passwords/darkweb2017-top10000.txt", "Darkweb top 10k"),
+            ("/usr/share/seclists/Passwords/Leaked-Databases/rockyou-75.txt", "Rockyou 75%"),
+        ],
+    }
+
+    service = service.lower()
+    if service not in WORDLISTS:
+        available = ", ".join(WORDLISTS.keys())
+        error(f"Servicio no reconocido. Disponibles: {available}")
+        raise typer.Exit()
+
+    table = Table(title=f"Wordlists para {service.upper()}")
+    table.add_column("Ruta", style="cyan")
+    table.add_column("Descripcion", style="white")
+
+    for path, desc in WORDLISTS[service]:
+        table.add_row(path, desc)
+
+    console.print(table)
+    info("Rutas para Kali Linux. En otras distros pueden variar.")
+
 if __name__ == "__main__":
     app()
