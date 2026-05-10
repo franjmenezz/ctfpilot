@@ -8,7 +8,6 @@ on:
 
 jobs:
 
-  # ── JOB 1: Tests y calidad de código ──
   test:
     name: Tests & Code Quality
     runs-on: ubuntu-latest
@@ -27,7 +26,7 @@ jobs:
           pip install -r requirements.txt
           pip install pytest bandit safety
 
-     -  name: Install CTFPilot
+      - name: Install CTFPilot
         run: |
           pip install hatchling
           python -m hatchling build -t wheel
@@ -36,7 +35,6 @@ jobs:
       - name: Run tests
         run: pytest tests/ -v --tb=short || true
 
-  # ── JOB 2: Seguridad del código (SAST) ──
   sast:
     name: SAST - Static Analysis
     runs-on: ubuntu-latest
@@ -64,7 +62,6 @@ jobs:
           name: bandit-report
           path: bandit-report.json
 
-  # ── JOB 3: Dependencias vulnerables ──
   dependency-check:
     name: Dependency Vulnerability Check
     runs-on: ubuntu-latest
@@ -87,7 +84,6 @@ jobs:
           safety check --json || true
           safety check
 
-  # ── JOB 4: Build y scan de imagen Docker ──
   docker:
     name: Docker Build & Security Scan
     runs-on: ubuntu-latest
@@ -106,7 +102,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y trivy
 
-      - name: Run Trivy scan on Docker image
+      - name: Run Trivy scan
         run: |
           trivy image --exit-code 0 --severity HIGH,CRITICAL \
             --format table ctfpilot:${{ github.sha }}
@@ -117,7 +113,7 @@ jobs:
             --format json --output trivy-report.json \
             ctfpilot:${{ github.sha }}
 
-      - name: Upload Trivy report artifact
+      - name: Upload Trivy artifact
         uses: actions/upload-artifact@v4
         with:
           name: trivy-report
