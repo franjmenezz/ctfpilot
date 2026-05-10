@@ -118,3 +118,24 @@ jobs:
         with:
           name: trivy-report
           path: trivy-report.json
+
+  kubernetes:
+    name: Kubernetes Manifest Validation
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install kubeval
+        run: |
+          wget https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz
+          tar xf kubeval-linux-amd64.tar.gz
+          sudo mv kubeval /usr/local/bin
+
+      - name: Validate Kubernetes manifests
+        run: |
+          kubeval k8s/configmap.yml
+          kubeval k8s/pvc.yml
+          kubeval k8s/deployment.yml
+          kubeval k8s/network-policy.yml
