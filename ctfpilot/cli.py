@@ -193,5 +193,47 @@ def wordlist(
     console.print(table)
     info("Rutas para Kali Linux. En otras distros pueden variar.")
 
+@app.command()
+def timer():
+    """Muestra cuanto tiempo llevas en la sesion activa."""
+    from datetime import datetime
+    from ctfpilot.core.logger import console
+    from rich.table import Table
+
+    session = get_active_session()
+    if not session:
+        warning("No hay sesion activa.")
+        raise typer.Exit()
+
+    started = datetime.fromisoformat(session["started_at"])
+    now = datetime.now()
+    elapsed = now - started
+
+    total_seconds = int(elapsed.total_seconds())
+    hours = total_seconds // 3600
+    minutes = (total_seconds % 3600) // 60
+    seconds = total_seconds % 60
+
+    if hours > 4:
+        color = "red"
+        msg = "Llevas mucho tiempo, considera tomar un descanso"
+    elif hours > 2:
+        color = "yellow"
+        msg = "Buen ritmo, sigue adelante"
+    else:
+        color = "green"
+        msg = "Recien empezando, a por ello"
+
+    table = Table(title=f"Timer — {session['name']}")
+    table.add_column("Campo", style="cyan")
+    table.add_column("Valor", style=color)
+    table.add_row("Maquina", session["name"])
+    table.add_row("Target", session["target"])
+    table.add_row("Tiempo transcurrido", f"{hours:02d}:{minutes:02d}:{seconds:02d}")
+    table.add_row("Estado", msg)
+    table.add_row("Iniciada", session["started_at"][:16])
+
+    console.print(table)
+
 if __name__ == "__main__":
     app()
