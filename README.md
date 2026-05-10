@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # ctfpilot# 🧭 CTFPilot
 
 > Your co-pilot for CTFs and HackTheBox machines
