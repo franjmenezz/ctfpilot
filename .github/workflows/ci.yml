@@ -119,7 +119,7 @@ jobs:
           name: trivy-report
           path: trivy-report.json
 
- kubernetes:
+  kubernetes:
     name: Kubernetes Manifest Validation
     runs-on: ubuntu-latest
     needs: test
