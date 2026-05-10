@@ -81,16 +81,19 @@ def status():
 
 @app.command()
 def report(
-    fmt: str = typer.Option("html", "--format", "-f", help="Formato: html, pdf")
+    fmt: str = typer.Option("html", "--format", "-f", help="Formato: html, pdf, md")
 ):
     """Genera el reporte de la sesion activa."""
     session = get_active_session()
     if not session:
         error("No hay sesion activa.")
         raise typer.Exit()
-    from ctfpilot.modules.report.builder import generate_report
+    from ctfpilot.modules.report.builder import generate_report, generate_markdown
     info(f"Generando reporte en formato {fmt.upper()}...")
-    path = generate_report(session["id"], fmt)
+    if fmt == "md":
+        path = generate_markdown(session["id"])
+    else:
+        path = generate_report(session["id"], fmt)
     success(f"Reporte guardado en: {path}")
 
 @app.command()
