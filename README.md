@@ -117,7 +117,7 @@ Reports are automatically saved to `~/Desktop/CTFPilot/` and include:
 
 ## Author
 
-**Francisco J. Menez** — Pentester & Full Stack Developer oriented to DevSecOps
+**Francisco Jiménez** — Pentester & Full Stack Developer oriented to DevSecOps
 
 [![GitHub](https://img.shields.io/badge/GitHub-franjmenezz-black)](https://github.com/franjmenezz)
 
