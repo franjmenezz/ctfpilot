@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+*.egg-info/
+venv/
+db/
+.env
+.vscode/
+# Base de datos local
+db/
+*.db
+
+# VS Code
+.vscode/
+
+# Sistema
+.DS_Store
+Thumbs.db
