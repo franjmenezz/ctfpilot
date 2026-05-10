@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "ctfpilot"
+version = "0.1.0"
+description = "Your co-pilot for CTFs and HackTheBox machines"
+requires-python = ">=3.11"
+dependencies = [
+    "typer",
+    "rich",
+    "httpx",
+    "python-nmap",
+]
+
+[project.scripts]
+ctfpilot = "ctfpilot.cli:app"
+
+[tool.setuptools.packages.find]
+where = ["."]
