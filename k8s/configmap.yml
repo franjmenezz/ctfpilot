@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ctfpilot-config
+  namespace: default
+  labels:
+    app: ctfpilot
+data:
+  CTFPILOT_VERSION: "0.1.0"
+  CTFPILOT_ENV: "production"

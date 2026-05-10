@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ctfpilot
+  namespace: default
+  labels:
+    app: ctfpilot
+    version: "0.1.0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ctfpilot
+  template:
+    metadata:
+      labels:
+        app: ctfpilot
+    spec:
+      securityContext:
+        runAsNonRoot: false
+        runAsUser: 0
+      containers:
+        - name: ctfpilot
+          image: ctfpilot:latest
+          imagePullPolicy: Never
+          command: ["ctfpilot", "--help"]
+          envFrom:
+            - configMapRef:
+                name: ctfpilot-config
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          volumeMounts:
+            - name: db-storage
+              mountPath: /app/db
+            - name: reports-storage
+              mountPath: /root/Desktop/CTFPilot
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              add: ["NET_RAW", "NET_ADMIN"]
+      volumes:
+        - name: db-storage
+          persistentVolumeClaim:
+            claimName: ctfpilot-db-pvc
+        - name: reports-storage
+          persistentVolumeClaim:
+            claimName: ctfpilot-reports-pvc
