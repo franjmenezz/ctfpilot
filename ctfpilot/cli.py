@@ -78,6 +78,21 @@ def status():
     table.add_row("Plataforma", session["platform"].upper())
     table.add_row("Iniciada", session["started_at"])
     console.print(table)
+    
+@app.command()
+def report(
+    fmt: str = typer.Option("html", "--format", "-f", help="Formato: html, pdf")
+):
+    """Genera el reporte de la sesión activa."""
+    session = get_active_session()
+    if not session:
+        error("No hay sesión activa.")
+        raise typer.Exit()
+    
+    from ctfpilot.modules.report.builder import generate_report
+    info(f"Generando reporte en formato {fmt.upper()}...")
+    path = generate_report(session["id"], fmt)
+    success(f"Reporte guardado en: {path}")
 
 if __name__ == "__main__":
     app()
