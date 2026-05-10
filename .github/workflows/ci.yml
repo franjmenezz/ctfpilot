@@ -27,8 +27,11 @@ jobs:
           pip install -r requirements.txt
           pip install pytest bandit safety
 
-      - name: Install CTFPilot
-        run: pip install --no-build-isolation -e .
+     -  name: Install CTFPilot
+        run: |
+          pip install hatchling
+          python -m hatchling build -t wheel
+          pip install dist/*.whl
 
       - name: Run tests
         run: pytest tests/ -v --tb=short || true
