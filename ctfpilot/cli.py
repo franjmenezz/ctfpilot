@@ -235,5 +235,22 @@ def timer():
 
     console.print(table)
 
+@app.command()
+def ai_setup():
+    """Configura la API key de Groq para sugerencias con IA."""
+    from ctfpilot.core.config import get_groq_key
+    from ctfpilot.modules.suggest.ai_advisor import prompt_for_groq_key
+
+    existing = get_groq_key()
+    if existing:
+        success(f"Ya tienes una API key configurada: {existing[:8]}...")
+        overwrite = typer.confirm("Quieres reemplazarla?")
+        if not overwrite:
+            raise typer.Exit()
+
+    key = prompt_for_groq_key()
+    if key:
+        success("API key configurada correctamente.")
+
 if __name__ == "__main__":
     app()
