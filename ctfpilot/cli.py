@@ -1,3 +1,7 @@
+from sys import platform
+
+from ctfpilot.ctfpilot.core import session
+from ctfpilot.ctfpilot.core.metrics import record_flag_captured, record_session_finished
 import typer
 from ctfpilot.core.logger import banner, info, success, warning, error
 from ctfpilot.core.session import (
@@ -31,6 +35,8 @@ def start(
     info(f"Plataforma: [bold]{platform.upper()}[/bold]")
     session_id = create_session(name, target, platform)
     success(f"Sesion creada con ID: {session_id}")
+    from ctfpilot.core.metrics import record_session_created
+    record_session_created(platform)
     info("Lanzando reconocimiento automatico...")
     from ctfpilot.core.engine import run_recon
     run_recon(target, session_id)
@@ -58,6 +64,8 @@ def flag(
         error("No hay sesion activa. Usa 'ctfpilot start' primero.")
         raise typer.Exit()
     add_flag(session["id"], flag_type, value)
+    from ctfpilot.core.metrics import record_flag_captured
+    record_flag_captured(flag_type)
     success(f"Flag [{flag_type.upper()}] registrada en sesion: {session['name']}")
 
 @app.command()
@@ -95,6 +103,8 @@ def report(
     else:
         path = generate_report(session["id"], fmt)
     success(f"Reporte guardado en: {path}")
+    from ctfpilot.core.metrics import record_report_generated
+    record_report_generated(fmt)
 
 @app.command()
 def finish():
@@ -105,6 +115,11 @@ def finish():
         raise typer.Exit()
     from ctfpilot.core.session import finish_session
     finish_session(session["id"])
+    from ctfpilot.core.metrics import record_session_finished
+    from datetime import datetime
+    started = datetime.fromisoformat(session["started_at"])
+    duration = (datetime.now() - started).total_seconds()
+    record_session_finished(duration)
     success(f"Sesion [bold]{session['name']}[/bold] finalizada.")
 
 @app.command()
