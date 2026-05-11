@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 from pathlib import Path
 from jinja2 import Template
@@ -62,6 +63,17 @@ TEMPLATE = """
 </html>
 """
 
+def get_output_dir() -> Path:
+    sudo_user = os.environ.get("SUDO_USER")
+    if sudo_user:
+        home = Path(f"/home/{sudo_user}")
+    else:
+        home = Path.home()
+    desktop = home / "Desktop" if (home / "Desktop").exists() else home / "Escritorio"
+    output = desktop / "CTFPilot"
+    output.mkdir(parents=True, exist_ok=True)
+    return output
+
 def generate_report(session_id: int, fmt: str = "html") -> str:
     data = get_session_data(session_id)
     session_row = data["session"]
@@ -77,19 +89,18 @@ def generate_report(session_id: int, fmt: str = "html") -> str:
     html = Template(TEMPLATE).render(
         session=session, notes=notes, flags=flags, generated_at=generated_at
     )
-    desktop = Path.home() / "Desktop" / "CTFPilot"
-    desktop.mkdir(exist_ok=True)
+    output_dir = get_output_dir()
     filename = f"{session['name'].replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
     if fmt == "pdf":
         try:
             from weasyprint import HTML
-            output_path = desktop / f"{filename}.pdf"
+            output_path = output_dir / f"{filename}.pdf"
             HTML(string=html).write_pdf(str(output_path))
         except Exception:
-            output_path = desktop / f"{filename}.html"
+            output_path = output_dir / f"{filename}.html"
             output_path.write_text(html, encoding="utf-8")
     else:
-        output_path = desktop / f"{filename}.html"
+        output_path = output_dir / f"{filename}.html"
         output_path.write_text(html, encoding="utf-8")
     return str(output_path)
 
@@ -142,9 +153,8 @@ def generate_markdown(session_id: int) -> str:
 
     md += f"\n---\n*Generado por CTFPilot v0.1.0 — {generated_at}*\n"
 
-    desktop = Path.home() / "Desktop" / "CTFPilot"
-    desktop.mkdir(exist_ok=True)
+    output_dir = get_output_dir()
     filename = f"{name.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
-    output_path = desktop / filename
+    output_path = output_dir / filename
     output_path.write_text(md, encoding="utf-8")
     return str(output_path)
