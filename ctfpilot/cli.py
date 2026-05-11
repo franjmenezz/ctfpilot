@@ -1,13 +1,8 @@
-from sys import platform
-
-from ctfpilot.ctfpilot.core import session
-from ctfpilot.ctfpilot.core.metrics import record_flag_captured, record_session_finished
 import typer
 from ctfpilot.core.logger import banner, info, success, warning, error
 from ctfpilot.core.session import (
     create_session, get_active_session, add_note, add_flag
 )
-
 app = typer.Typer(
     help="CTFPilot - Your co-pilot for CTFs and HackTheBox machines",
     no_args_is_help=True
@@ -266,6 +261,26 @@ def ai_setup():
     key = prompt_for_groq_key()
     if key:
         success("API key configurada correctamente.")
+
+@app.command()
+def recon(
+    target: str = typer.Option(None, "--target", "-t", help="IP o dominio (usa el de la sesion activa si no se especifica)")
+):
+    """Relanza el reconocimiento sobre el target activo."""
+    from ctfpilot.core.engine import run_recon
+
+    session = get_active_session()
+
+    if target is None:
+        if not session:
+            error("No hay sesion activa y no especificaste un target.")
+            raise typer.Exit()
+        target = session["target"]
+        info(f"Usando target de la sesion activa: [bold]{target}[/bold]")
+
+    session_id = session["id"] if session else 0
+    info(f"Relanzando reconocimiento sobre [bold]{target}[/bold]...")
+    run_recon(target, session_id)
 
 if __name__ == "__main__":
     app()
