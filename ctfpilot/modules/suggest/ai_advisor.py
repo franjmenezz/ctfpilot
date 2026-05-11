@@ -12,7 +12,7 @@ def prompt_for_groq_key() -> str | None:
         "  1. Ve a [link=https://console.groq.com]console.groq.com[/link]\n"
         "  2. Crea una cuenta gratuita\n"
         "  3. Ve a API Keys y genera una nueva\n"
-        "  4. Pégala aqui\n\n"
+        "  4. Pegala aqui\n\n"
         "[dim]Presiona Ctrl+C para omitir esta funcion[/dim]",
         title="🤖 IA requerida",
         border_style="cyan"
@@ -25,13 +25,41 @@ def prompt_for_groq_key() -> str | None:
             info("API key guardada en ~/.ctfpilot/config.env")
             return key.strip()
     except KeyboardInterrupt:
-        warning("Funcion de IA omitida. Puedes activarla mas tarde con 'ctfpilot ai-setup'")
+        warning("Funcion de IA omitida.")
+        return None
+
+def handle_existing_key(existing_key: str) -> str | None:
+    from rich.prompt import Prompt
+    from rich.panel import Panel
+
+    console.print(Panel(
+        f"[bold green]API key de Groq detectada[/bold green]\n\n"
+        f"Key actual: [cyan]{existing_key[:8]}...{existing_key[-4:]}[/cyan]\n\n"
+        "[bold]Opciones:[/bold]\n"
+        "  [cyan]1[/cyan] → Ver sugerencias de IA\n"
+        "  [cyan]2[/cyan] → Cambiar la API key\n"
+        "  [cyan]Ctrl+C[/cyan] → Omitir",
+        title="🤖 CTFPilot IA",
+        border_style="cyan"
+    ))
+
+    try:
+        opcion = Prompt.ask("\n[cyan]Elige una opcion[/cyan]", choices=["1", "2"])
+        if opcion == "2":
+            return prompt_for_groq_key()
+        return existing_key
+    except KeyboardInterrupt:
+        warning("Sugerencias de IA omitidas.")
         return None
 
 def get_ai_suggestions(target: str, open_ports: list) -> list:
     key = get_groq_key()
-    if not key:
+
+    if key:
+        key = handle_existing_key(key)
+    else:
         key = prompt_for_groq_key()
+
     if not key:
         return []
 
